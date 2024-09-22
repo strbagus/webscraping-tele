@@ -15,9 +15,9 @@ const getData = async () => {
     postData.title = $(el).find("h3").text();
     postData.link = $(el).find("a").attr("href");
 
-    const news = lPosts.posts.find((pEl) => pEl.title == postData.title);
+    const news = lPosts.posts.some((pel) => pel.title == postData.title);
 
-    !news && messages(`${postData.title} - ${postData.link}`) 
+    !news && messages(`${postData.title} - ${postData.link}`);
 
     posts.push(postData);
   });
@@ -28,7 +28,6 @@ const getData = async () => {
     }),
   );
 };
-
 
 const bot = new Telegraf(process.env.BToken);
 
@@ -43,8 +42,7 @@ bot.command("subscribe", async (ctx) => {
   const user = ctx.message.chat.id;
   const users = JSON.parse(fs.readFileSync("db/tUser.json", "utf8"));
 
-  const exists = users.find((el) => el == user);
-  if (!exists) {
+  if (!users.includes(user)) {
     users.push(user);
     fs.writeFileSync("db/tUser.json", JSON.stringify(users));
 
@@ -58,12 +56,11 @@ bot.command("unsubscribe", async (ctx) => {
   const user = ctx.message.chat.id;
   const users = JSON.parse(fs.readFileSync("db/tUser.json", "utf8"));
 
-  const exists = users.find((el) => el == user);
-  if (exists) {
+  if (users.includes(user)) {
     const removed = users.filter((el) => el != user);
     fs.writeFileSync("db/tUser.json", JSON.stringify(removed));
 
-    await ctx.reply("Anda akan berhenti mendapat informasi terbaru.");
+    await ctx.reply("Anda berhenti mendapat informasi terbaru.");
   } else {
     await ctx.reply("Anda belum berlangganan.");
   }
@@ -74,15 +71,13 @@ bot.launch();
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
 
-
-const messages = async (msg = 'default msg') => {
+const messages = async (msg) => {
   const users = JSON.parse(fs.readFileSync("db/tUser.json", "utf8"));
-  users.forEach(el => {
-    bot.telegram.sendMessage(el, msg)
+  users.forEach((el) => {
+    bot.telegram.sendMessage(el, msg);
   });
-}
-
+};
 
 setInterval(async () => {
   getData();
-}, 900000)
+}, 900000);
