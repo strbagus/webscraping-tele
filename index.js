@@ -37,7 +37,14 @@ bot.use(async (ctx, next) => {
   console.timeEnd(`Processing update ${ctx.update.update_id}`);
 });
 
+bot.start((ctx) =>
+  ctx.reply(
+    "Selamat datang di Bot Info FTI UMBY. /subscribe untuk mendapatkan informasi terbaru.",
+  ),
+);
+
 // COMMAND
+
 bot.command("subscribe", async (ctx) => {
   const user = ctx.message.chat.id;
   const users = JSON.parse(fs.readFileSync("db/tUser.json", "utf8"));
@@ -64,6 +71,13 @@ bot.command("unsubscribe", async (ctx) => {
   } else {
     await ctx.reply("Anda belum berlangganan.");
   }
+});
+
+bot.command("lastinfo", async (ctx) => {
+  const user = ctx.message.chat.id;
+  const lPosts = JSON.parse(fs.readFileSync("db/post.json", "utf-8"));
+  const msg = `${lPosts.posts[0].title} - ${lPosts.posts[0].link}`;
+  bot.telegram.sendMessage(user, msg);
 });
 
 bot.launch();
